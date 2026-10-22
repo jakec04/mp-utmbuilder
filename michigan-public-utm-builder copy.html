@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
+<title>Michigan Public UTM Builder</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500&display=swap">
+<style>
+  /* Layout: narrow column of dropdowns on the left, copyable result on the right; stacks on phones. */
+  :root {
+    --bg: #F4F6F9;
+    --surface: #FFFFFF;
+    --ink: #142033;
+    --muted: #566377;
+    --line: #D8DEE7;
+    --line-strong: #B9C3D1;
+    --accent: #1B4F9C;
+    --accent-ink: #FFFFFF;
+    --accent-soft: #E3EBF7;
+    --ok: #1F7A4D;
+    --ok-soft: #E1F2E9;
+    --warn: #8F5A00;
+    --warn-soft: #FBEFD5;
+    --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0E1520;
+      --surface: #151E2B;
+      --ink: #E7ECF3;
+      --muted: #93A1B4;
+      --line: #243044;
+      --line-strong: #38465C;
+      --accent: #86B2EE;
+      --accent-ink: #0E1520;
+      --accent-soft: #1A2B45;
+      --ok: #6FD0A0;
+      --ok-soft: #143025;
+      --warn: #E6B65C;
+      --warn-soft: #33270F;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0E1520;
+    --surface: #151E2B;
+    --ink: #E7ECF3;
+    --muted: #93A1B4;
+    --line: #243044;
+    --line-strong: #38465C;
+    --accent: #86B2EE;
+    --accent-ink: #0E1520;
+    --accent-soft: #1A2B45;
+    --ok: #6FD0A0;
+    --ok-soft: #143025;
+    --warn: #E6B65C;
+    --warn-soft: #33270F;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    padding-block: 40px 56px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 56rem; margin: 0 auto; }
+
+  header { margin-bottom: 32px; }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(1.9rem, 4.5vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .lede { color: var(--muted); max-width: 40rem; margin: 0; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 21rem) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 760px) {
+    .grid { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+    body { padding-block: 28px 40px; }
+  }
+
+  /* Form */
+  form { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+  .field { display: grid; gap: 6px; min-width: 0; }
+  .field > label { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
+  .opt { font-weight: 400; color: var(--muted); }
+  select, input[type="text"] {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--ink);
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+  }
+  input[type="text"].mono { font-family: var(--font-mono); font-size: 15px; }
+  select:disabled { opacity: 0.75; background: var(--bg); cursor: not-allowed; }
+  select:focus-visible, input:focus-visible, button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .hint { margin: 0; font-size: 13px; color: var(--muted); min-height: 1.25em; overflow-wrap: anywhere; }
+  .hint.changed { color: var(--accent); }
+
+  .ghost {
+    align-self: flex-start;
+    font: inherit;
+    font-size: 14px;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 4px 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .ghost:hover { color: var(--ink); }
+
+  /* Output */
+  .out {
+    min-width: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px;
+  }
+  .out-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h2, h3 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0; }
+  h3 { margin: 28px 0 8px; }
+  .pill {
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--warn-soft);
+    color: var(--warn);
+  }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+
+  .sub { margin: 6px 0 14px; color: var(--muted); }
+  .val-row { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+  .val {
+    flex: 1 1 14rem;
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    font-size: 14.5px;
+    line-height: 1.55;
+    padding: 14px 16px;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+  }
+  .val.placeholder { color: var(--muted); font-weight: 400; }
+
+  button.copy {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 0 16px;
+    min-height: 40px;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: 0;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  button.copy:hover { filter: brightness(1.08); }
+  button.copy:disabled { opacity: 0.4; cursor: not-allowed; filter: none; }
+  button.copy.done { background: var(--ok); color: var(--surface); }
+  button.copy.small {
+    min-height: 32px;
+    padding: 0 12px;
+    font-size: 13px;
+    color: var(--accent);
+    background: transparent;
+    border: 1px solid var(--line-strong);
+  }
+  button.copy.small.done { color: var(--ok); border-color: var(--ok); background: transparent; }
+
+  .rows { margin: 0; border-top: 1px solid var(--line); }
+  .row {
+    display: grid;
+    grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+  }
+  .row dt { font-family: var(--font-mono); font-size: 13.5px; color: var(--muted); }
+  .row dd { margin: 0; min-width: 0; }
+  .row .slot { min-width: 4.5rem; display: flex; justify-content: flex-end; }
+  code { font-family: var(--font-mono); font-size: 14px; overflow-wrap: anywhere; }
+  code.blank { color: var(--muted); font-style: italic; font-family: var(--font-body); }
+
+  .notes { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
+  .notes li { font-size: 13.5px; padding: 8px 12px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); }
+  .notes li.info { background: var(--accent-soft); color: var(--ink); }
+
+  footer { margin-top: 36px; color: var(--muted); font-size: 13px; max-width: 40rem; }
+  footer p { margin: 0 0 6px; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    button.copy { transition: filter 0.15s; }
+  }
+</style>
+</head>
+<body>
+
+
+<main class="wrap">
+  <header>
+    <h1>Michigan Public UTM Builder</h1>
+    <p class="lede">Choose each part from a list, then copy the parameters, a single value or the whole string.</p>
+  </header>
+
+  <div class="grid">
+    <form id="f" autocomplete="off" onsubmit="return false">
+      <div class="field">
+        <label for="source">utm_source</label>
+        <select id="source"></select>
+        <p class="hint">What sent the click.</p>
+      </div>
+
+      <div class="field">
+        <label for="medium">utm_medium</label>
+        <select id="medium"></select>
+        <p class="hint" id="mediumHint"></p>
+      </div>
+
+      <div class="field">
+        <label for="campaign">utm_campaign</label>
+        <select id="campaign"></select>
+        <p class="hint">Use the same campaign on every channel promoting the same thing.</p>
+      </div>
+
+      <div class="field">
+        <label for="utmId">utm_id <span class="opt">(optional)</span></label>
+        <input type="text" id="utmId" class="mono" placeholder="fd2613r2" spellcheck="false" autocapitalize="off">
+        <p class="hint" id="idHint"></p>
+      </div>
+
+      <button type="button" class="ghost" id="reset">Reset form</button>
+    </form>
+
+    <section class="out" aria-labelledby="outH" aria-live="polite">
+      <div class="out-head">
+        <h2 id="outH">Parameters</h2>
+        <span class="pill" id="pill"></span>
+      </div>
+      <p class="sub">Paste this after the link, or copy values one at a time into a tool's fields.</p>
+      <div class="val-row">
+        <code class="val" id="qsOut"></code>
+        <button type="button" class="copy" id="qsCopy" data-copy="qsOut">Copy all</button>
+      </div>
+
+      <h3>Values</h3>
+      <dl class="rows">
+        <div class="row"><dt>utm_source</dt><dd><code id="vSource"></code></dd><span class="slot"><button type="button" class="copy small" id="bSource" data-copy="vSource">Copy</button></span></div>
+        <div class="row"><dt>utm_medium</dt><dd><code id="vMedium"></code></dd><span class="slot"><button type="button" class="copy small" id="bMedium" data-copy="vMedium">Copy</button></span></div>
+        <div class="row"><dt>utm_campaign</dt><dd><code id="vCampaign"></code></dd><span class="slot"><button type="button" class="copy small" id="bCampaign" data-copy="vCampaign">Copy</button></span></div>
+        <div class="row"><dt>utm_id</dt><dd><code id="vId"></code></dd><span class="slot"><button type="button" class="copy small" id="bId" data-copy="vId">Copy</button></span></div>
+      </dl>
+
+      <ul class="notes" id="notes" hidden></ul>
+    </section>
+  </div>
+
+  <footer>
+    <p>Source, medium and campaign come from fixed lists, lowercase with hyphens and no spaces. utm_id holds an external system code only, such as an Allegiance source code, and is cleaned up as you type.</p>
+  </footer>
+</main>
+
+<script>
+/*PURE*/
+const CONFIG = {
+  // [label shown, value used]. Medium options follow the source's group.
+  sourceGroups: [
+    { group: 'Email', mediums: ['email'], items: [['Mailchimp', 'mailchimp']] },
+    { group: 'Social', mediums: ['social', 'paid-social'], items: [
+      ['Facebook', 'facebook'], ['Instagram', 'instagram'], ['Threads', 'threads'],
+      ['TikTok', 'tiktok'], ['X (Twitter)', 'twitter'], ['LinkedIn', 'linkedin'], ['YouTube', 'youtube']
+    ] },
+    { group: 'On-site ads', mediums: ['house', 'display'], items: [['Google Ad Manager', 'gam']] }
+  ],
+  mediumLabels: {
+    'email': 'email',
+    'social': 'social (organic)',
+    'paid-social': 'paid-social (boosted or paid)',
+    'house': 'house (our own promotion)',
+    'display': 'display (paid line item)'
+  },
+  campaignGroups: [
+    { group: 'Editorial', items: ['environment', 'stateside', 'twts', 'ijp', 'republished'] },
+    { group: 'Membership', items: ['fall-fund-drive-fy27'] }
+  ]
+};
+
+function mediumsFor(source) {
+  const g = CONFIG.sourceGroups.find((g) => g.items.some((i) => i[1] === source));
+  return g ? g.mediums : [];
+}
+function sourceLabel(source) {
+  for (const g of CONFIG.sourceGroups) for (const i of g.items) if (i[1] === source) return i[0];
+  return source;
+}
+// utm_id: lowercase, spaces removed, anything but letters, numbers, hyphens and underscores dropped.
+function cleanId(s) {
+  return String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9_-]/g, '');
+}
+function build(v) {
+  const info = [];
+  const mediums = mediumsFor(v.source);
+  const medium = mediums.includes(v.medium) ? v.medium : (mediums[0] || '');
+  const source = v.source || '';
+  const campaign = v.campaign || '';
+  const id = cleanId(v.utmId);
+
+  const params = [['utm_source', source], ['utm_medium', medium], ['utm_campaign', campaign]];
+  if (id) params.push(['utm_id', id]);
+  const complete = !!(source && medium && campaign);
+  const query = params.map(([k, x]) => k + '=' + x).join('&');
+
+  if (source === 'mailchimp') {
+    info.push('Mailchimp auto-tagging already adds source, medium and campaign to regular sends. Add only utm_id to those links by hand.');
+  }
+  return { source, medium, campaign, id, complete, query, info };
+}
+/*END PURE*/
+
+(function () {
+  const $ = (id) => document.getElementById(id);
+
+  function addGroups(sel, groups, labelOf, valueOf) {
+    sel.innerHTML = '';
+    groups.forEach((g) => {
+      const og = document.createElement('optgroup');
+      og.label = g.group;
+      g.items.forEach((it) => {
+        const o = document.createElement('option');
+        o.value = valueOf(it); o.textContent = labelOf(it);
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    });
+  }
+  addGroups($('source'), CONFIG.sourceGroups, (i) => i[0], (i) => i[1]);
+  addGroups($('campaign'), CONFIG.campaignGroups, (i) => i, (i) => i);
+
+  const DEFAULTS = { source: 'facebook', medium: 'social', campaign: 'fall-fund-drive-fy27' };
+
+  function syncMedium() {
+    const sel = $('medium');
+    const allowed = mediumsFor($('source').value);
+    const cur = sel.value;
+    const same = allowed.length === sel.options.length && allowed.every((m, i) => sel.options[i].value === m);
+    if (!same) {
+      sel.innerHTML = '';
+      allowed.forEach((m) => {
+        const o = document.createElement('option');
+        o.value = m; o.textContent = CONFIG.mediumLabels[m] || m;
+        sel.appendChild(o);
+      });
+      sel.value = allowed.includes(cur) ? cur : allowed[0];
+    }
+    sel.disabled = allowed.length < 2;
+    $('mediumHint').textContent = allowed.length < 2
+      ? 'Set by the source. ' + sourceLabel($('source').value) + ' only uses ' + (allowed[0] || '') + '.'
+      : 'Choose how this ran.';
+  }
+
+  function read() {
+    return {
+      source: $('source').value,
+      medium: $('medium').value,
+      campaign: $('campaign').value,
+      utmId: $('utmId').value
+    };
+  }
+
+  function setRow(valId, btnId, value, blankText) {
+    const el = $(valId);
+    el.textContent = value || blankText;
+    el.classList.toggle('blank', !value);
+    $(btnId).hidden = !value;
+  }
+
+  function save(v) {
+    try { localStorage.setItem('mp-utm-builder', JSON.stringify({ source: v.source, medium: v.medium, campaign: v.campaign })); } catch (e) {}
+  }
+
+  function render() {
+    syncMedium();
+    const v = read();
+    const r = build(v);
+
+    // utm_id cleans itself as it is typed.
+    const idEl = $('utmId');
+    if (idEl.value !== '' && idEl.value !== r.id) {
+      const pos = idEl.selectionStart;
+      const before = cleanId(idEl.value.slice(0, pos)).length;
+      idEl.value = r.id;
+      try { idEl.setSelectionRange(before, before); } catch (e) {}
+    }
+    const hint = $('idHint');
+    hint.textContent = 'Allegiance source code, like fd2613r2. Lowercased automatically. Leave blank if there is no code.';
+
+    const qs = $('qsOut');
+    qs.textContent = r.complete ? r.query : 'utm_source=…&utm_medium=…&utm_campaign=…';
+    qs.classList.toggle('placeholder', !r.complete);
+    $('qsCopy').disabled = !r.complete;
+
+    setRow('vSource', 'bSource', r.source, '—');
+    setRow('vMedium', 'bMedium', r.medium, '—');
+    setRow('vCampaign', 'bCampaign', r.campaign, '—');
+    setRow('vId', 'bId', r.id, 'blank');
+
+    const pill = $('pill');
+    pill.textContent = r.complete ? 'Ready to copy' : 'Choose source and campaign';
+    pill.classList.toggle('ok', r.complete);
+
+    const ul = $('notes');
+    ul.innerHTML = '';
+    r.info.forEach((n) => { const li = document.createElement('li'); li.className = 'info'; li.textContent = n; ul.appendChild(li); });
+    ul.hidden = r.info.length === 0;
+
+    save(v);
+  }
+
+  // Start from the defaults, then restore the last choices made in this browser.
+  $('source').value = DEFAULTS.source;
+  $('campaign').value = DEFAULTS.campaign;
+  syncMedium();
+  $('medium').value = DEFAULTS.medium;
+  try {
+    const s = JSON.parse(localStorage.getItem('mp-utm-builder') || 'null');
+    if (s) {
+      const has = (sel, val) => [...sel.options].some((o) => o.value === val);
+      if (has($('source'), s.source)) $('source').value = s.source;
+      if (has($('campaign'), s.campaign)) $('campaign').value = s.campaign;
+      syncMedium();
+      if (has($('medium'), s.medium)) $('medium').value = s.medium;
+    }
+  } catch (e) {}
+
+  $('f').addEventListener('input', render);
+  $('f').addEventListener('change', render);
+  $('reset').addEventListener('click', () => {
+    $('f').reset();
+    $('source').value = DEFAULTS.source;
+    $('campaign').value = DEFAULTS.campaign;
+    syncMedium();
+    $('medium').value = DEFAULTS.medium;
+    render();
+  });
+
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-copy]');
+    if (!b || b.disabled) return;
+    const src = $(b.dataset.copy);
+    const text = src.textContent.trim();
+    const label = b.dataset.label || (b.dataset.label = b.textContent);
+    const flash = (msg, cls) => {
+      b.textContent = msg;
+      if (cls) b.classList.add(cls);
+      setTimeout(() => { b.textContent = label; b.classList.remove('done'); }, 1500);
+    };
+    const select = () => {
+      const range = document.createRange();
+      range.selectNodeContents(src);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      flash('Selected');
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(() => flash('Copied', 'done'), select);
+    } else {
+      select();
+    }
+  });
+
+  render();
+})();
+</script>
+
+</body>
+</html>
