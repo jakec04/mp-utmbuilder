@@ -234,7 +234,7 @@
 <main class="wrap">
   <header>
     <h1>Michigan Public UTM Builder</h1>
-    <p class="lede">Choose each part from a list, then copy the parameters, a single value or the whole string.</p>
+    <p class="lede">Choose each part from a list, then copy the parameters, a single value or the whole string. Use it for every channel, including Mailchimp.</p>
   </header>
 
   <div class="grid">
@@ -258,8 +258,14 @@
       </div>
 
       <div class="field">
+        <label for="content">utm_content <span class="opt">(optional)</span></label>
+        <select id="content"></select>
+        <p class="hint" id="contentHint"></p>
+      </div>
+
+      <div class="field">
         <label for="utmId">utm_id <span class="opt">(optional)</span></label>
-        <input type="text" id="utmId" class="mono" placeholder="fd2613r2" spellcheck="false" autocapitalize="off">
+        <input type="text" id="utmId" class="mono" placeholder="fd26r1" spellcheck="false" autocapitalize="off">
         <p class="hint" id="idHint"></p>
       </div>
 
@@ -282,6 +288,7 @@
         <div class="row"><dt>utm_source</dt><dd><code id="vSource"></code></dd><span class="slot"><button type="button" class="copy small" id="bSource" data-copy="vSource">Copy</button></span></div>
         <div class="row"><dt>utm_medium</dt><dd><code id="vMedium"></code></dd><span class="slot"><button type="button" class="copy small" id="bMedium" data-copy="vMedium">Copy</button></span></div>
         <div class="row"><dt>utm_campaign</dt><dd><code id="vCampaign"></code></dd><span class="slot"><button type="button" class="copy small" id="bCampaign" data-copy="vCampaign">Copy</button></span></div>
+        <div class="row"><dt>utm_content</dt><dd><code id="vContent"></code></dd><span class="slot"><button type="button" class="copy small" id="bContent" data-copy="vContent">Copy</button></span></div>
         <div class="row"><dt>utm_id</dt><dd><code id="vId"></code></dd><span class="slot"><button type="button" class="copy small" id="bId" data-copy="vId">Copy</button></span></div>
       </dl>
 
@@ -290,7 +297,8 @@
   </div>
 
   <footer>
-    <p>Source, medium and campaign come from fixed lists, lowercase with hyphens and no spaces. utm_id holds an external system code only, such as an Allegiance source code, and is cleaned up as you type.</p>
+    <p>Source, medium, campaign and content come from fixed lists, lowercase with hyphens and no spaces. utm_id holds an external system code only, such as an Allegiance source code, and is cleaned up as you type. Never include donor IDs, emails, names or ask amounts.</p>
+    <p>Mailchimp campaign titles are free-form and don't affect tracking. Don't add UTMs to links within michiganpublic.org.</p>
   </footer>
 </main>
 
@@ -302,7 +310,7 @@ const CONFIG = {
     { group: 'Email', mediums: ['email'], items: [['Mailchimp', 'mailchimp']] },
     { group: 'Social', mediums: ['social', 'paid-social'], items: [
       ['Facebook', 'facebook'], ['Instagram', 'instagram'], ['Threads', 'threads'],
-      ['TikTok', 'tiktok'], ['X (Twitter)', 'twitter'], ['LinkedIn', 'linkedin'], ['YouTube', 'youtube']
+      ['TikTok', 'tiktok'], ['X (Twitter)', 'x'], ['LinkedIn', 'linkedin'], ['YouTube', 'youtube']
     ] },
     { group: 'On-site ads', mediums: ['house', 'display'], items: [['Google Ad Manager', 'gam']] }
   ],
@@ -313,15 +321,36 @@ const CONFIG = {
     'house': 'house (our own promotion)',
     'display': 'display (paid line item)'
   },
+  // One slug per newsletter or vertical. Single-topic newsletters share their vertical's slug,
+  // so email, social and web roll up together.
   campaignGroups: [
-    { group: 'Editorial', items: ['environment', 'stateside', 'twts', 'ijp', 'republished'] },
-    { group: 'Membership', items: ['fall-fund-drive-fy27'] }
-  ]
+    { group: 'Newsletters and verticals', items: [
+      ['The Beat (daily)', 'beat'],
+      ['The Environment Report', 'environment'],
+      ["It's Just Politics", 'ijp'],
+      ['This Week @Michigan Public', 'this-week'],
+      ['The Shortlist (monthly)', 'shortlist'],
+      ['The Mids', 'mids'],
+      ["That's What They Say", 'twts']
+    ] },
+    { group: 'Membership', items: [['Fall fund drive FY27', 'fall-fund-drive-fy27']] }
+  ],
+  // Placement or format within a channel. Mediums not listed here have no utm_content.
+  contentByMedium: {
+    'email': ['header', 'body', 'footer'],
+    'social': ['reel', 'carousel', 'static-post', 'story'],
+    'paid-social': ['reel', 'carousel', 'static-post', 'story']
+  },
+  // Campaigns that normally carry an external source code in utm_id.
+  codeCampaigns: ['fall-fund-drive-fy27']
 };
 
 function mediumsFor(source) {
   const g = CONFIG.sourceGroups.find((g) => g.items.some((i) => i[1] === source));
   return g ? g.mediums : [];
+}
+function contentFor(medium) {
+  return CONFIG.contentByMedium[medium] || [];
 }
 function sourceLabel(source) {
   for (const g of CONFIG.sourceGroups) for (const i of g.items) if (i[1] === source) return i[0];
@@ -335,19 +364,28 @@ function build(v) {
   const info = [];
   const mediums = mediumsFor(v.source);
   const medium = mediums.includes(v.medium) ? v.medium : (mediums[0] || '');
+  const contents = contentFor(medium);
   const source = v.source || '';
   const campaign = v.campaign || '';
+  const content = contents.includes(v.content) ? v.content : '';
   const id = cleanId(v.utmId);
 
   const params = [['utm_source', source], ['utm_medium', medium], ['utm_campaign', campaign]];
+  if (content) params.push(['utm_content', content]);
   if (id) params.push(['utm_id', id]);
   const complete = !!(source && medium && campaign);
   const query = params.map(([k, x]) => k + '=' + x).join('&');
 
   if (source === 'mailchimp') {
-    info.push('Mailchimp auto-tagging already adds source, medium and campaign to regular sends. Add only utm_id to those links by hand.');
+    info.push('Paste these parameters onto the link in Mailchimp. The campaign title does not affect tracking.');
   }
-  return { source, medium, campaign, id, complete, query, info };
+  if (CONFIG.codeCampaigns.includes(campaign) && !id) {
+    info.push('Fund-drive links usually carry an Allegiance source code in utm_id.');
+  }
+  if (String(v.utmId || '').includes('@')) {
+    info.push('utm_id looks like an email address. Remove it: no personal information in UTMs.');
+  }
+  return { source, medium, campaign, content, id, complete, query, info };
 }
 /*END PURE*/
 
@@ -368,9 +406,9 @@ function build(v) {
     });
   }
   addGroups($('source'), CONFIG.sourceGroups, (i) => i[0], (i) => i[1]);
-  addGroups($('campaign'), CONFIG.campaignGroups, (i) => i, (i) => i);
+  addGroups($('campaign'), CONFIG.campaignGroups, (i) => i[0] + ' (' + i[1] + ')', (i) => i[1]);
 
-  const DEFAULTS = { source: 'facebook', medium: 'social', campaign: 'fall-fund-drive-fy27' };
+  const DEFAULTS = { source: 'mailchimp', medium: 'email', campaign: 'beat', content: '' };
 
   function syncMedium() {
     const sel = $('medium');
@@ -392,11 +430,36 @@ function build(v) {
       : 'Choose how this ran.';
   }
 
+  function syncContent() {
+    const sel = $('content');
+    const allowed = contentFor($('medium').value);
+    const cur = sel.value;
+    const same = sel.options.length === allowed.length + 1 &&
+      allowed.every((c, i) => sel.options[i + 1].value === c);
+    if (!same) {
+      sel.innerHTML = '';
+      const none = document.createElement('option');
+      none.value = ''; none.textContent = 'None';
+      sel.appendChild(none);
+      allowed.forEach((c) => {
+        const o = document.createElement('option');
+        o.value = c; o.textContent = c;
+        sel.appendChild(o);
+      });
+      sel.value = allowed.includes(cur) ? cur : '';
+    }
+    sel.disabled = allowed.length === 0;
+    $('contentHint').textContent = allowed.length === 0
+      ? 'Not used for this medium.'
+      : ($('medium').value === 'email' ? 'Where in the email the link sits.' : 'Post format.');
+  }
+
   function read() {
     return {
       source: $('source').value,
       medium: $('medium').value,
       campaign: $('campaign').value,
+      content: $('content').value,
       utmId: $('utmId').value
     };
   }
@@ -409,11 +472,12 @@ function build(v) {
   }
 
   function save(v) {
-    try { localStorage.setItem('mp-utm-builder', JSON.stringify({ source: v.source, medium: v.medium, campaign: v.campaign })); } catch (e) {}
+    try { localStorage.setItem('mp-utm-builder-v2', JSON.stringify({ source: v.source, medium: v.medium, campaign: v.campaign, content: v.content })); } catch (e) {}
   }
 
   function render() {
     syncMedium();
+    syncContent();
     const v = read();
     const r = build(v);
 
@@ -425,8 +489,7 @@ function build(v) {
       idEl.value = r.id;
       try { idEl.setSelectionRange(before, before); } catch (e) {}
     }
-    const hint = $('idHint');
-    hint.textContent = 'Allegiance source code, like fd2613r2. Lowercased automatically. Leave blank if there is no code.';
+    $('idHint').textContent = 'Allegiance source code only, like fd26r1. Lowercased automatically. Leave blank if there is no code.';
 
     const qs = $('qsOut');
     qs.textContent = r.complete ? r.query : 'utm_source=…&utm_medium=…&utm_campaign=…';
@@ -436,6 +499,7 @@ function build(v) {
     setRow('vSource', 'bSource', r.source, '—');
     setRow('vMedium', 'bMedium', r.medium, '—');
     setRow('vCampaign', 'bCampaign', r.campaign, '—');
+    setRow('vContent', 'bContent', r.content, 'blank');
     setRow('vId', 'bId', r.id, 'blank');
 
     const pill = $('pill');
@@ -444,25 +508,38 @@ function build(v) {
 
     const ul = $('notes');
     ul.innerHTML = '';
-    r.info.forEach((n) => { const li = document.createElement('li'); li.className = 'info'; li.textContent = n; ul.appendChild(li); });
+    r.info.forEach((n) => {
+      const li = document.createElement('li');
+      li.className = n.indexOf('Remove it') !== -1 ? '' : 'info';
+      li.textContent = n;
+      ul.appendChild(li);
+    });
     ul.hidden = r.info.length === 0;
 
     save(v);
   }
 
+  function applyDefaults() {
+    $('source').value = DEFAULTS.source;
+    $('campaign').value = DEFAULTS.campaign;
+    syncMedium();
+    $('medium').value = DEFAULTS.medium;
+    syncContent();
+    $('content').value = DEFAULTS.content;
+  }
+
   // Start from the defaults, then restore the last choices made in this browser.
-  $('source').value = DEFAULTS.source;
-  $('campaign').value = DEFAULTS.campaign;
-  syncMedium();
-  $('medium').value = DEFAULTS.medium;
+  applyDefaults();
   try {
-    const s = JSON.parse(localStorage.getItem('mp-utm-builder') || 'null');
+    const s = JSON.parse(localStorage.getItem('mp-utm-builder-v2') || 'null');
     if (s) {
       const has = (sel, val) => [...sel.options].some((o) => o.value === val);
       if (has($('source'), s.source)) $('source').value = s.source;
       if (has($('campaign'), s.campaign)) $('campaign').value = s.campaign;
       syncMedium();
       if (has($('medium'), s.medium)) $('medium').value = s.medium;
+      syncContent();
+      if (has($('content'), s.content)) $('content').value = s.content;
     }
   } catch (e) {}
 
@@ -470,10 +547,7 @@ function build(v) {
   $('f').addEventListener('change', render);
   $('reset').addEventListener('click', () => {
     $('f').reset();
-    $('source').value = DEFAULTS.source;
-    $('campaign').value = DEFAULTS.campaign;
-    syncMedium();
-    $('medium').value = DEFAULTS.medium;
+    applyDefaults();
     render();
   });
 
