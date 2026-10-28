@@ -4,61 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>:root{color-scheme:light}body{margin:0}[hidden]{display:none!important}</style>
-<title>Michigan Public UTM Builder</title>
+<title>Michigan Public Link Builder</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:opsz,wght@6..72,500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400&family=Prompt:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: narrow column of dropdowns on the left, copyable result on the right; stacks on phones. */
+  /* Layout: narrow column of dropdowns on the left, copyable result on the right; stacks on phones.
+     Brand: Libre Baskerville for the headline, Prompt for everything else.
+     Palette: Michigan Public green 4ED52A, teal 55A48C, blue 0A70FF, purple 6F60FF.
+     Buttons and links use a darker shade of the brand blue so white text stays readable. */
   :root {
-    --bg: #F4F6F9;
+    --green: #4ED52A;
+    --teal: #55A48C;
+    --blue: #0A70FF;
+    --purple: #6F60FF;
+    --bg: #F5F7FA;
     --surface: #FFFFFF;
-    --ink: #142033;
-    --muted: #566377;
-    --line: #D8DEE7;
-    --line-strong: #B9C3D1;
-    --accent: #1B4F9C;
+    --ink: #0F1B2D;
+    --muted: #55627A;
+    --line: #D9DFE8;
+    --line-strong: #B7C1D0;
+    --accent: #0B5FD9;
     --accent-ink: #FFFFFF;
-    --accent-soft: #E3EBF7;
-    --ok: #1F7A4D;
-    --ok-soft: #E1F2E9;
+    --accent-soft: #E6F0FF;
+    --ok: #26705A;
+    --ok-soft: #E1F3EC;
     --warn: #8F5A00;
     --warn-soft: #FBEFD5;
-    --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
-    --font-body: 'Hanken Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-display: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+    --font-body: 'Prompt', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0E1520;
-      --surface: #151E2B;
-      --ink: #E7ECF3;
-      --muted: #93A1B4;
-      --line: #243044;
-      --line-strong: #38465C;
-      --accent: #86B2EE;
-      --accent-ink: #0E1520;
-      --accent-soft: #1A2B45;
-      --ok: #6FD0A0;
-      --ok-soft: #143025;
+      --bg: #0C1424;
+      --surface: #131D30;
+      --ink: #E8EDF5;
+      --muted: #96A4B8;
+      --line: #25324A;
+      --line-strong: #3A4960;
+      --accent: #7AB0FF;
+      --accent-ink: #0C1424;
+      --accent-soft: #172A4A;
+      --ok: #6CC9A8;
+      --ok-soft: #12302A;
       --warn: #E6B65C;
       --warn-soft: #33270F;
       color-scheme: dark;
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0E1520;
-    --surface: #151E2B;
-    --ink: #E7ECF3;
-    --muted: #93A1B4;
-    --line: #243044;
-    --line-strong: #38465C;
-    --accent: #86B2EE;
-    --accent-ink: #0E1520;
-    --accent-soft: #1A2B45;
-    --ok: #6FD0A0;
-    --ok-soft: #143025;
+    --bg: #0C1424;
+    --surface: #131D30;
+    --ink: #E8EDF5;
+    --muted: #96A4B8;
+    --line: #25324A;
+    --line-strong: #3A4960;
+    --accent: #7AB0FF;
+    --accent-ink: #0C1424;
+    --accent-soft: #172A4A;
+    --ok: #6CC9A8;
+    --ok-soft: #12302A;
     --warn: #E6B65C;
     --warn-soft: #33270F;
     color-scheme: dark;
@@ -70,7 +77,8 @@
     color: var(--ink);
     font-family: var(--font-body);
     font-size: 15px;
-    line-height: 1.5;
+    font-weight: 300;
+    line-height: 1.55;
     padding-block: 40px 56px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
@@ -78,16 +86,22 @@
   .wrap { max-width: 56rem; margin: 0 auto; }
 
   header { margin-bottom: 32px; }
+  .stripe { display: flex; width: 7rem; height: 6px; border-radius: 3px; overflow: hidden; margin-bottom: 22px; }
+  .stripe i { flex: 1; }
+  .stripe i:nth-child(1) { background: var(--green); }
+  .stripe i:nth-child(2) { background: var(--teal); }
+  .stripe i:nth-child(3) { background: var(--blue); }
+  .stripe i:nth-child(4) { background: var(--purple); }
   h1 {
     font-family: var(--font-display);
-    font-weight: 500;
-    font-size: clamp(1.9rem, 4.5vw, 2.6rem);
-    line-height: 1.1;
-    letter-spacing: -0.01em;
+    font-weight: 400;
+    font-size: clamp(1.8rem, 4.2vw, 2.4rem);
+    line-height: 1.2;
+    letter-spacing: 0;
     margin: 0 0 10px;
     text-wrap: balance;
   }
-  .lede { color: var(--muted); max-width: 40rem; margin: 0; }
+  .lede { color: var(--muted); max-width: 40rem; margin: 0; font-size: 16px; }
 
   .grid {
     display: grid;
@@ -103,14 +117,15 @@
   /* Form */
   form { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
   .field { display: grid; gap: 6px; min-width: 0; }
-  .field > label { font-size: 13px; font-weight: 600; letter-spacing: 0.01em; }
-  .opt { font-weight: 400; color: var(--muted); }
+  .field > label { font-size: 14px; font-weight: 500; }
+  .opt { font-weight: 300; color: var(--muted); }
   select, input[type="text"] {
     width: 100%;
     height: 42px;
     padding: 0 12px;
     font: inherit;
     font-size: 16px;
+    font-weight: 400;
     color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line-strong);
@@ -119,10 +134,10 @@
   input[type="text"].mono { font-family: var(--font-mono); font-size: 15px; }
   select:disabled { opacity: 0.75; background: var(--bg); cursor: not-allowed; }
   select:focus-visible, input:focus-visible, button:focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--blue);
     outline-offset: 2px;
   }
-  .hint { margin: 0; font-size: 13px; color: var(--muted); min-height: 1.25em; overflow-wrap: anywhere; }
+  .hint { margin: 0; font-size: 13px; font-weight: 400; color: var(--muted); min-height: 1.25em; overflow-wrap: anywhere; }
   .hint.changed { color: var(--accent); }
 
   .ghost {
@@ -148,19 +163,18 @@
     padding: 24px;
   }
   .out-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  h2, h3 { font-size: 13px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0; }
-  h3 { margin: 28px 0 8px; }
+  h2 { font-size: 16px; font-weight: 500; color: var(--ink); margin: 0; }
   .pill {
-    font-size: 12.5px;
-    font-weight: 600;
-    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 3px 12px;
     border-radius: 999px;
     background: var(--warn-soft);
     color: var(--warn);
   }
   .pill.ok { background: var(--ok-soft); color: var(--ok); }
 
-  .sub { margin: 6px 0 14px; color: var(--muted); }
+  .sub { margin: 6px 0 14px; color: var(--muted); font-weight: 400; }
   .val-row { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
   .val {
     flex: 1 1 14rem;
@@ -210,17 +224,22 @@
     border-bottom: 1px solid var(--line);
     align-items: center;
   }
-  .row dt { font-family: var(--font-mono); font-size: 13.5px; color: var(--muted); }
+  .row dt { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
   .row dd { margin: 0; min-width: 0; }
   .row .slot { min-width: 4.5rem; display: flex; justify-content: flex-end; }
   code { font-family: var(--font-mono); font-size: 14px; overflow-wrap: anywhere; }
   code.blank { color: var(--muted); font-style: italic; font-family: var(--font-body); }
 
   .notes { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 8px; }
-  .notes li { font-size: 13.5px; padding: 8px 12px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); }
+  .notes li { font-size: 14px; font-weight: 400; padding: 8px 12px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); }
   .notes li.info { background: var(--accent-soft); color: var(--ink); }
 
-  footer { margin-top: 36px; color: var(--muted); font-size: 13px; max-width: 40rem; }
+  details.more { margin-top: 24px; }
+  details.more summary { cursor: pointer; font-size: 14px; font-weight: 400; color: var(--muted); padding: 4px 0; }
+  details.more summary:hover { color: var(--ink); }
+  details.more .rows { margin-top: 10px; }
+
+  footer { margin-top: 36px; color: var(--muted); font-size: 13px; font-weight: 400; max-width: 40rem; }
   footer p { margin: 0 0 6px; }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -233,72 +252,82 @@
 
 <main class="wrap">
   <header>
-    <h1>Michigan Public UTM Builder</h1>
-    <p class="lede">Choose each part from a list, then copy the parameters, a single value or the whole string. Use it for every channel, including Mailchimp.</p>
+    <div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    <h1>Michigan Public Link Builder</h1>
+    <p class="lede">Paste a michiganpublic.org link, answer a few questions, and copy the new link. It lets us see which emails and posts send readers to our site.</p>
   </header>
 
   <div class="grid">
     <form id="f" autocomplete="off" onsubmit="return false">
       <div class="field">
-        <label for="source">utm_source</label>
-        <select id="source"></select>
-        <p class="hint">What sent the click.</p>
+        <label for="target">Link to track</label>
+        <input type="text" id="target" class="mono" placeholder="https://www.michiganpublic.org/..." spellcheck="false" autocapitalize="off" inputmode="url">
+        <p class="hint">Paste a michiganpublic.org page. Links to other websites can't be tracked.</p>
       </div>
 
       <div class="field">
-        <label for="medium">utm_medium</label>
+        <label for="source">Where will you share it?</label>
+        <select id="source"></select>
+        <p class="hint">Pick where this link will go.</p>
+      </div>
+
+      <div class="field">
+        <label for="medium">Type</label>
         <select id="medium"></select>
         <p class="hint" id="mediumHint"></p>
       </div>
 
       <div class="field">
-        <label for="campaign">utm_campaign</label>
+        <label for="campaign">What is it for?</label>
         <select id="campaign"></select>
-        <p class="hint">Use the same campaign on every channel promoting the same thing.</p>
+        <p class="hint">Pick the newsletter or topic. Use the same one everywhere you share the same thing.</p>
       </div>
 
       <div class="field">
-        <label for="content">utm_content <span class="opt">(optional)</span></label>
+        <label for="content">Where does the link sit? <span class="opt">(optional)</span></label>
         <select id="content"></select>
         <p class="hint" id="contentHint"></p>
       </div>
 
       <div class="field">
-        <label for="utmId">utm_id <span class="opt">(optional)</span></label>
+        <label for="utmId">Fundraising source code <span class="opt">(optional)</span></label>
         <input type="text" id="utmId" class="mono" placeholder="fd26r1" spellcheck="false" autocapitalize="off">
         <p class="hint" id="idHint"></p>
       </div>
 
-      <button type="button" class="ghost" id="reset">Reset form</button>
+      <button type="button" class="ghost" id="reset">Start over</button>
     </form>
 
     <section class="out" aria-labelledby="outH" aria-live="polite">
       <div class="out-head">
-        <h2 id="outH">Parameters</h2>
+        <h2 id="outH">Your link</h2>
         <span class="pill" id="pill"></span>
       </div>
-      <p class="sub">Paste this after the link, or copy values one at a time into a tool's fields.</p>
+      <p class="sub" id="sub"></p>
       <div class="val-row">
         <code class="val" id="qsOut"></code>
-        <button type="button" class="copy" id="qsCopy" data-copy="qsOut">Copy all</button>
+        <button type="button" class="copy" id="qsCopy" data-copy="qsOut">Copy link</button>
       </div>
 
-      <h3>Values</h3>
+      <details class="more">
+      <summary>Copy the pieces separately (for Sprout and other tools)</summary>
       <dl class="rows">
         <div class="row"><dt>utm_source</dt><dd><code id="vSource"></code></dd><span class="slot"><button type="button" class="copy small" id="bSource" data-copy="vSource">Copy</button></span></div>
         <div class="row"><dt>utm_medium</dt><dd><code id="vMedium"></code></dd><span class="slot"><button type="button" class="copy small" id="bMedium" data-copy="vMedium">Copy</button></span></div>
         <div class="row"><dt>utm_campaign</dt><dd><code id="vCampaign"></code></dd><span class="slot"><button type="button" class="copy small" id="bCampaign" data-copy="vCampaign">Copy</button></span></div>
         <div class="row"><dt>utm_content</dt><dd><code id="vContent"></code></dd><span class="slot"><button type="button" class="copy small" id="bContent" data-copy="vContent">Copy</button></span></div>
         <div class="row"><dt>utm_id</dt><dd><code id="vId"></code></dd><span class="slot"><button type="button" class="copy small" id="bId" data-copy="vId">Copy</button></span></div>
+        <div class="row"><dt>parameters</dt><dd><code id="vQuery"></code></dd><span class="slot"><button type="button" class="copy small" id="bQuery" data-copy="vQuery">Copy</button></span></div>
       </dl>
+      </details>
 
       <ul class="notes" id="notes" hidden></ul>
     </section>
   </div>
 
   <footer>
-    <p>Source, medium, campaign and content come from fixed lists, lowercase with hyphens and no spaces. utm_id holds an external system code only, such as an Allegiance source code, and is cleaned up as you type. Never include donor IDs, emails, names or ask amounts.</p>
-    <p>Mailchimp campaign titles are free-form and don't affect tracking. Don't add UTMs to links within michiganpublic.org.</p>
+    <p>This only works for links to michiganpublic.org. Links to other websites can't be tracked, and it isn't needed for links between pages on our own site.</p>
+    <p>Never put a name, email address or donor number in a link.</p>
   </footer>
 </main>
 
@@ -312,14 +341,23 @@ const CONFIG = {
       ['Facebook', 'facebook'], ['Instagram', 'instagram'], ['Threads', 'threads'],
       ['TikTok', 'tiktok'], ['X (Twitter)', 'x'], ['LinkedIn', 'linkedin'], ['YouTube', 'youtube']
     ] },
-    { group: 'On-site ads', mediums: ['house', 'display'], items: [['Google Ad Manager', 'gam']] }
+    { group: 'Ads on our site', mediums: ['house', 'display'], items: [['Google Ad Manager', 'gam']] }
   ],
   mediumLabels: {
-    'email': 'email',
-    'social': 'social (organic)',
-    'paid-social': 'paid-social (boosted or paid)',
-    'house': 'house (our own promotion)',
-    'display': 'display (paid line item)'
+    'email': 'Email',
+    'social': 'Regular post',
+    'paid-social': 'Boosted or paid post',
+    'house': 'Our own promotion',
+    'display': 'Paid ad'
+  },
+  contentLabels: {
+    'header': 'Top of the email',
+    'body': 'Main part of the email',
+    'footer': 'Bottom of the email',
+    'reel': 'Reel',
+    'carousel': 'Carousel',
+    'static-post': 'Single image post',
+    'story': 'Story'
   },
   // One slug per newsletter or vertical. Single-topic newsletters share their vertical's slug,
   // so email, social and web roll up together.
@@ -360,8 +398,25 @@ function sourceLabel(source) {
 function cleanId(s) {
   return String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9_-]/g, '');
 }
+// Adds the utm parameters to a destination link. Existing utm_ parameters are replaced;
+// other query parameters and any #fragment are kept.
+function withParams(raw, params) {
+  const t = String(raw || '').trim();
+  if (!t) return { link: '', error: false, replaced: false, host: '' };
+  let u;
+  try { u = new URL(/^[a-z][a-z0-9+.-]*:/i.test(t) ? t : 'https://' + t); }
+  catch (e) { return { link: '', error: true, replaced: false }; }
+  if ((u.protocol !== 'http:' && u.protocol !== 'https:') || u.hostname.indexOf('.') === -1) {
+    return { link: '', error: true, replaced: false };
+  }
+  const stale = [...u.searchParams.keys()].filter((k) => k.toLowerCase().indexOf('utm_') === 0);
+  stale.forEach((k) => u.searchParams.delete(k));
+  params.forEach(([k, x]) => u.searchParams.set(k, x));
+  return { link: u.toString(), error: false, replaced: stale.length > 0, host: u.hostname.toLowerCase() };
+}
 function build(v) {
   const info = [];
+  const warn = [];
   const mediums = mediumsFor(v.source);
   const medium = mediums.includes(v.medium) ? v.medium : (mediums[0] || '');
   const contents = contentFor(medium);
@@ -376,16 +431,23 @@ function build(v) {
   const complete = !!(source && medium && campaign);
   const query = params.map(([k, x]) => k + '=' + x).join('&');
 
+  const target = complete ? withParams(v.target, params) : { link: '', error: false, replaced: false };
+  if (target.error) warn.push('That doesn\'t look like a link. Paste the full web address, starting with https://');
+  if (target.link && target.host !== 'michiganpublic.org' && !target.host.endsWith('.michiganpublic.org')) {
+    warn.push('This link goes to another website, so we can\'t track it. Use a michiganpublic.org link instead.');
+  }
+  if (target.replaced) info.push('This link already had tracking added. We replaced it.');
+
   if (source === 'mailchimp') {
-    info.push('Paste these parameters onto the link in Mailchimp. The campaign title does not affect tracking.');
+    info.push('Paste this link into Mailchimp as usual. The name you give the email in Mailchimp doesn\'t affect tracking.');
   }
   if (CONFIG.codeCampaigns.includes(campaign) && !id) {
-    info.push('Fund-drive links usually carry an Allegiance source code in utm_id.');
+    info.push('Fundraising links usually need a source code. Add the one you were given.');
   }
   if (String(v.utmId || '').includes('@')) {
-    info.push('utm_id looks like an email address. Remove it: no personal information in UTMs.');
+    warn.push('That looks like an email address. Remove it. Never put personal information in a link.');
   }
-  return { source, medium, campaign, content, id, complete, query, info };
+  return { source, medium, campaign, content, id, complete, query, link: target.link, info, warn };
 }
 /*END PURE*/
 
@@ -406,7 +468,7 @@ function build(v) {
     });
   }
   addGroups($('source'), CONFIG.sourceGroups, (i) => i[0], (i) => i[1]);
-  addGroups($('campaign'), CONFIG.campaignGroups, (i) => i[0] + ' (' + i[1] + ')', (i) => i[1]);
+  addGroups($('campaign'), CONFIG.campaignGroups, (i) => i[0], (i) => i[1]);
 
   const DEFAULTS = { source: 'mailchimp', medium: 'email', campaign: 'beat', content: '' };
 
@@ -426,8 +488,8 @@ function build(v) {
     }
     sel.disabled = allowed.length < 2;
     $('mediumHint').textContent = allowed.length < 2
-      ? 'Set by the source. ' + sourceLabel($('source').value) + ' only uses ' + (allowed[0] || '') + '.'
-      : 'Choose how this ran.';
+      ? 'Set for you.'
+      : 'Is money behind it? Pick the paid option. If not, pick the other.';
   }
 
   function syncContent() {
@@ -439,23 +501,24 @@ function build(v) {
     if (!same) {
       sel.innerHTML = '';
       const none = document.createElement('option');
-      none.value = ''; none.textContent = 'None';
+      none.value = ''; none.textContent = 'Not sure / skip';
       sel.appendChild(none);
       allowed.forEach((c) => {
         const o = document.createElement('option');
-        o.value = c; o.textContent = c;
+        o.value = c; o.textContent = CONFIG.contentLabels[c] || c;
         sel.appendChild(o);
       });
       sel.value = allowed.includes(cur) ? cur : '';
     }
     sel.disabled = allowed.length === 0;
     $('contentHint').textContent = allowed.length === 0
-      ? 'Not used for this medium.'
-      : ($('medium').value === 'email' ? 'Where in the email the link sits.' : 'Post format.');
+      ? 'Not needed here.'
+      : 'Skip this if you\'re not sure.';
   }
 
   function read() {
     return {
+      target: $('target').value,
       source: $('source').value,
       medium: $('medium').value,
       campaign: $('campaign').value,
@@ -489,32 +552,42 @@ function build(v) {
       idEl.value = r.id;
       try { idEl.setSelectionRange(before, before); } catch (e) {}
     }
-    $('idHint').textContent = 'Allegiance source code only, like fd26r1. Lowercased automatically. Leave blank if there is no code.';
+    $('idHint').textContent = 'Only for fundraising links. Use the code you were given. Leave blank for everything else.';
 
     const qs = $('qsOut');
-    qs.textContent = r.complete ? r.query : 'utm_source=…&utm_medium=…&utm_campaign=…';
-    qs.classList.toggle('placeholder', !r.complete);
-    $('qsCopy').disabled = !r.complete;
+    const showLink = !!r.link;
+    qs.textContent = showLink ? r.link : 'Your new link will show up here.';
+    qs.classList.toggle('placeholder', !showLink);
+    $('qsCopy').disabled = !showLink;
+    $('sub').textContent = showLink
+      ? 'Copy it and paste it wherever the link goes.'
+      : 'Paste a link on the left to get started.';
 
     setRow('vSource', 'bSource', r.source, '—');
     setRow('vMedium', 'bMedium', r.medium, '—');
     setRow('vCampaign', 'bCampaign', r.campaign, '—');
     setRow('vContent', 'bContent', r.content, 'blank');
     setRow('vId', 'bId', r.id, 'blank');
+    setRow('vQuery', 'bQuery', r.complete ? r.query : '', '—');
 
     const pill = $('pill');
-    pill.textContent = r.complete ? 'Ready to copy' : 'Choose source and campaign';
-    pill.classList.toggle('ok', r.complete);
+    pill.textContent = showLink ? 'Ready to copy' : 'Waiting for a link';
+    pill.classList.toggle('ok', showLink);
 
     const ul = $('notes');
     ul.innerHTML = '';
-    r.info.forEach((n) => {
+    r.warn.forEach((n) => {
       const li = document.createElement('li');
-      li.className = n.indexOf('Remove it') !== -1 ? '' : 'info';
       li.textContent = n;
       ul.appendChild(li);
     });
-    ul.hidden = r.info.length === 0;
+    r.info.forEach((n) => {
+      const li = document.createElement('li');
+      li.className = 'info';
+      li.textContent = n;
+      ul.appendChild(li);
+    });
+    ul.hidden = r.warn.length + r.info.length === 0;
 
     save(v);
   }
