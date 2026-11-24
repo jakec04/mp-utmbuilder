@@ -385,7 +385,7 @@
         </div>
       </fieldset>
 
-      <button type="button" class="ghost" id="reset">Start over</button>
+      <button type="button" class="ghost" id="startOver">Start over</button>
     </div>
   </form>
 </main>
@@ -507,7 +507,7 @@ function build(v) {
   if (content) params.push(['utm_content', content]);
   if (id) params.push(['utm_id', id]);
   const complete = !!(source && medium && campaign);
-  const query = params.map(([k, x]) => k + '=' + x).join('&');
+  const query = '?' + params.map(([k, x]) => k + '=' + x).join('&');
 
   const target = complete ? withParams(v.target, params) : { link: '', error: false, replaced: false };
   if (target.error) warn.push('That doesn\'t look like a link. Paste the full web address, starting with https://');
@@ -798,7 +798,7 @@ function linkLines(link) {
 
   $('f').addEventListener('input', render);
   $('f').addEventListener('change', render);
-  $('reset').addEventListener('click', () => {
+  $('startOver').addEventListener('click', () => {
     $('f').reset();
     applyDefaults();
     render();
